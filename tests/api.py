@@ -88,6 +88,7 @@ class TestBookings:
 
         #Проверка PATCH с не существующими данными
         patch_booking = auth_session.patch(f"{BASE_URL}/booking/{booking_id}", json={"proverka": 345})
+        assert patch_booking.status_code == 200
         assert get_patch_booking.json() == {'firstname': 'Richard', 'lastname': 'Gentle', 'totalprice': 999,
                                             'depositpaid': True,
                                             'bookingdates': {'checkin': '2024-04-05', 'checkout': '2024-04-08'},
