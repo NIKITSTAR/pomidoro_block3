@@ -3,8 +3,27 @@ from tests.conftest import booking_data_change
 
 
 class TestBookings:
+    """
+    Класс для тестирования функциональности бронирования.
+
+    Содержит методы для проверки создания, обновления (PUT, PATCH) и удаления бронирований,
+    а также проверки получения бронирований по различным критериям.
+    """
 
     def test_create_booking(self, booking_data, auth_session):
+        """
+        Тестирует процесс создания, получения и удаления бронирования.
+
+        Шаги теста:
+          - Создание бронирования с использованием данных booking_data.
+          - Проверка, что бронирование успешно создано (статус 200) и получен корректный booking_id.
+          - Получение созданного бронирования и проверка соответствия данных (firstname, lastname, totalprice, depositpaid, bookingdates).
+          - Удаление бронирования и проверка, что бронирование удалено (статус 201 и последующий статус 404 при попытке получить его).
+
+        Аргументы:
+            booking_data (dict): Словарь с данными для создания бронирования.
+            auth_session: Сессия авторизованного пользователя для отправки HTTP запросов.
+        """
         create_booking = auth_session.post(f"{BASE_URL}/booking", json=booking_data)
         assert create_booking.status_code == 200
         booking_id = create_booking.json().get("bookingid")
@@ -30,6 +49,25 @@ class TestBookings:
         assert get_deleted_booking.status_code == 404, "Букинг не был удален"
 
     def test_put_patch_getnoid(self, booking_data, booking_data_change, booking_data_patch, auth_session):
+        """
+        Тестирует обновление бронирования с использованием методов PUT и PATCH, а также получение бронирований без указания ID.
+
+        Шаги теста:
+          - Создание нового бронирования с данными booking_data.
+          - Обновление бронирования через PUT с данными booking_data_change и проверка соответствия обновлённых данных.
+          - Попытка обновления через PUT без обязательных полей; ожидается статус 400.
+          - Попытка обновления через PUT с неверными типами данных; ожидается статус 500.
+          - Обновление бронирования через PATCH с данными booking_data_patch и проверка соответствия обновлённых данных.
+          - Выполнение PATCH запроса с пустым телом, данные должны остаться без изменений.
+          - Выполнение PATCH запроса с несуществующими данными, проверка, что данные не изменились.
+          - Получение списка бронирований без указания ID и с фильтрацией по firstname и lastname.
+
+        Аргументы:
+            booking_data (dict): Словарь с начальными данными бронирования.
+            booking_data_change (dict): Словарь с данными для обновления через PUT.
+            booking_data_patch (dict): Словарь с данными для обновления через PATCH.
+            auth_session: Сессия авторизованного пользователя для отправки HTTP запросов.
+        """
         create_booking = auth_session.post(f"{BASE_URL}/booking", json=booking_data)
         booking_id = create_booking.json().get("bookingid")
         # Проверка обновления данных через PUT
@@ -93,7 +131,6 @@ class TestBookings:
                                             'depositpaid': True,
                                             'bookingdates': {'checkin': '2024-04-05', 'checkout': '2024-04-08'},
                                             'additionalneeds': 'Dinner'}
-
 
         #Проверка Get (без ID)
         getnoid_booking = auth_session.get(f"{BASE_URL}/booking/")
