@@ -4,43 +4,43 @@ class BankAccount:
 
     Атрибуты:
         owner (str): Владелец счета.
-        __balance (int, float): Текущий баланс счета (закрытый атрибут).
+        __balance (float): Текущий баланс счета (закрытый атрибут).
     """
-    def __init__(self, owner, balance=0):
+    def __init__(self, owner: str, balance: float = 0) -> None:
         """
         Инициализирует банковский счет с заданным владельцем и начальным балансом.
 
-        args:
+        Args:
             owner (str): Имя владельца счета.
-            balance (int, float, optional): Начальный баланс счета. По умолчанию 0.
+            balance (float, optional): Начальный баланс счета. По умолчанию 0.
         """
         self.owner = owner
         self.__balance = balance
 
-    def deposit(self, amount):
+    def deposit(self, amount: float) -> None:
         """
         Вносит депозит на счет.
 
-        args:
-            amount (int, float): Сумма депозита. Должна быть положительной.
+        Args:
+            amount (float): Сумма депозита. Должна быть положительной.
 
-        Возбуждает:
+        Raises:
             ValueError: Если сумма депозита не является положительной.
         """
-        if amount > 0:
-            self.__balance += amount
-        else:
+        if amount <= 0:
             raise ValueError("Сумма для депозита должна быть положительной!")
+        self.__balance += amount
 
-    def withdraw(self, amount):
+    def withdraw(self, amount: float) -> None:
         """
         Снимает указанную сумму со счета, если хватает средств.
 
-        args:
-            amount (int, float): Сумма для снятия. Должна быть положительной.
+        Args:
+            amount (float): Сумма для снятия. Должна быть положительной.
 
-        Возбуждает:
-            ValueError: Если сумма для снятия не положительная или если недостаточно средств.
+        Raises:
+            ValueError: Если сумма для снятия не положительная
+                        или если недостаточно средств.
         """
         if amount <= 0:
             raise ValueError("Сумма для снятия должна быть положительной!")
@@ -48,12 +48,12 @@ class BankAccount:
             raise ValueError("Недостаточно средств!")
         self.__balance -= amount
 
-    def get_balance(self):
+    def get_balance(self) -> float:
         """
         Возвращает текущий баланс счета.
 
-        Возвращает:
-            int, float: Текущий баланс счета.
+        Returns:
+            float: Текущий баланс счета.
         """
         return self.__balance
 
@@ -67,11 +67,13 @@ class SavingsAccount(BankAccount):
     """
     interest_rate = 0.05  # 5% годовых
 
-    def apply_interest(self):
+    def apply_interest(self) -> None:
         """
-        Применяет процентную ставку к текущему балансу счета, увеличивая его.
+        Применяет процентную ставку к текущему балансу счета.
+        Баланс увеличивается пропорционально interest_rate.
         """
         current_balance = self.get_balance()
+        # доступ к приватному атрибуту через _BankAccount__balance
         self._BankAccount__balance = current_balance * (1 + self.interest_rate)
 
 
@@ -79,33 +81,29 @@ class CheckingAccount(BankAccount):
     """
     Класс текущего счета, наследующийся от BankAccount, с модифицированным методом снятия.
     """
-    def withdraw(self, amount):
+    def withdraw(self, amount: float) -> None:
         """
         Снимает указанную сумму со счета без проверки достаточности средств.
 
-        args:
-            amount (int, float): Сумма для снятия. Должна быть положительной.
+        Args:
+            amount (float): Сумма для снятия. Должна быть положительной.
 
-        Возбуждает:
+        Raises:
             ValueError: Если сумма для снятия не положительная.
         """
         if amount <= 0:
             raise ValueError("Сумма для снятия должна быть положительной!")
         self._BankAccount__balance -= amount
 
-def test_bank():
+
+def test_bank() -> None:
     """
-    Тестирует функциональность сберегательного счета:
-      - Создает счет SavingsAccount.
-      - Вносит депозит, снимает средства и применяет процентную ставку.
-      - Проверяет, что итоговый баланс больше 0.
-      - Выводит итоговый баланс.
+    Тест функциональности сберегательного счета (SavingsAccount).
+    Проверяет внесение депозита, снятие средств, начисление процентов и итоговый баланс.
     """
     savings_account = SavingsAccount("Никита", 0)
     savings_account.deposit(500)
     savings_account.withdraw(100)
     savings_account.apply_interest()
     assert savings_account.get_balance() > 0
-    print(f"Баланс счета {savings_account.get_balance()}")
-
-
+    print(f"Баланс счета: {savings_account.get_balance()}")
